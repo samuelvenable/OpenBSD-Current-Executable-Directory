@@ -79,6 +79,11 @@ std::string GetExecutableDirectory() {
     kvm_close(kd);
     return res;
   };
+  auto cppstr_getenv = [](std::string name) {
+    const char *cresult = getenv(name.c_str());
+    std::string result = cresult ? cresult : "";
+    return result;
+  };
   int mib[4];
   char **cmd = nullptr;
   std::size_t len = 0;
@@ -106,8 +111,7 @@ std::string GetExecutableDirectory() {
         argv0 = buffer[0];
         path = is_exe(argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-        char *cpenv = getenv("PATH");
-        std::string penv = cpenv ? cpenv : "";
+        std::string penv = cppstr_getenv("PATH");
         if (!penv.empty()) {
           retry:
           std::string tmp;
@@ -126,8 +130,7 @@ std::string GetExecutableDirectory() {
         if (path.empty() && !retried) {
           retried = true;
           penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-          char *chome = getenv("HOME");
-          std::string home = chome ? chome : "";
+          std::string home = cppstr_getenv("HOME");
           if (!home.empty()) {
             penv = home + "/bin:" + penv;
           }
@@ -135,8 +138,7 @@ std::string GetExecutableDirectory() {
         }
       }
       if (path.empty() && slash_pos > 0) {
-        char *cpwd = getenv("PWD");
-        std::string pwd = cpwd ? cpwd : "";
+        std::string pwd = cppstr_getenv("PWD");
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer[0];
           path = is_exe(argv0);
@@ -153,8 +155,7 @@ std::string GetExecutableDirectory() {
     if (path.empty() && !error) {
       error = true;
       buffer.clear();
-      char *cunderscore = getenv("_");
-      std::string underscore = cunderscore ? cunderscore : "";
+      std::string underscore = cppstr_getenv("_");
       if (!underscore.empty()) {
         buffer.push_back(underscore);
         goto fallback;
