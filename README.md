@@ -1,2 +1,2 @@
-# OpenBSD Current Executable Directory
-OpenBSD Current Executable Directory Implementation
+# OpenBSD Current Executable Path
+OpenBSD Current Executable Path Implementation
