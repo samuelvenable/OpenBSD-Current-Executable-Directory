@@ -24,7 +24,7 @@
  
 */
 
-// OpenBSD Current Executable Directory Implementation
+// OpenBSD Current Executable Path Name Implementation
 // Compile: clang++ main.cpp -o a.out -std=c++17 -lkvm
 // libkvm comes with OpenBSD; no additional dependency
 
@@ -43,7 +43,7 @@
 #include <unistd.h>
 #include <kvm.h>
 
-std::string GetExecutableDirectory() {
+std::string get_executable_path() {
   std::string path;
   auto is_exe = [](std::string exe) {
     int cntp = 0;
@@ -167,20 +167,16 @@ std::string GetExecutableDirectory() {
   if (!path.empty()) {
     errno = 0;
   }
-  std::size_t pos = path.find_last_of("/");
-  if (pos != std::string::npos) {
-    path = path.substr(0, pos + 1);
-  }
   return path;
 }
 
 int main() {
-  std::string exe = GetExecutableDirectory();
+  std::string exe = get_executable_path();
   bool failed = exe.empty();
   if (!failed) {
-    printf("GetExecutableDirectory() Result: %s\n", exe.c_str());
+    printf("get_executable_path() result: %s\n", exe.c_str());
   } else {
-    printf("GetExecutableDirectory() Error: %s\n", strerror(errno));
+    printf("get_executable_path() error: %s\n", strerror(errno));
   }
   return failed;
 }
