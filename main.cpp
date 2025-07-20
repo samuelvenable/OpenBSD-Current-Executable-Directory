@@ -84,23 +84,25 @@ std::string GetExecutableDirectory() {
     std::string result = cresult ? cresult : "";
     return result;
   };
-  int mib[4];
-  char **cmd = nullptr;
-  std::size_t len = 0;
+  int cntp = 0;
+  kvm_t *kd = nullptr;
+  kinfo_proc *proc_info = nullptr;
   std::vector<std::string> buffer;
-  mib[0] = CTL_KERN;
-  mib[1] = KERN_PROC_ARGS;
-  mib[2] = getpid();
-  mib[3] = KERN_PROC_ARGV;
   bool error = false, retried = false;
-  if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-    if ((cmd = (char **)malloc(len))) {
-      if (sysctl(mib, 4, cmd, &len, nullptr, 0) == 0) {
-        buffer.push_back(cmd[0]);
+  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+  if (!kd) {
+    path.clear();
+    return path;
+  }
+  if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc), &cntp))) {
+    char **cmd = kvm_getargv(kd, proc_info, 0);
+    if (cmd) {
+      for (int i = 0; cmd[i]; i++) {
+        buffer.push_back(cmd[i]);
       }
-      free(cmd);
     }
   }
+  kvm_close(kd);
   if (!buffer.empty()) {
     std::string argv0;
     if (!buffer[0].empty()) {
