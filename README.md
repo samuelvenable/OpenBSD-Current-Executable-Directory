@@ -1,2 +1,2 @@
 # OpenBSD Current Executable Path
-OpenBSD Current Executable Path Implementation
+OpenBSD Current Executable Path Name Implementation
